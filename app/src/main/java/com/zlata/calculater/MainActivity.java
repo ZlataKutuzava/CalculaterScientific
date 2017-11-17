@@ -7,26 +7,33 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import java.util.regex.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 
 
 public class MainActivity extends AppCompatActivity {
 
     private static final String INPUT_VALUE= "input";
     private static final String OUTPUT_VALUE = "expression";
+    Boolean dot = false;
 
     EditText output;
     TextView input;
 
     Button zeroButton, oneButton, twoButton, threeButton, fourButton, fiveButton, sixButton, sevenButton, eightButton, nineButton;
 
-    Button plusButton, minusButton, starButton, divButton, changeSignButton, dotButton, leftBraceButton, rightBraceButton, factorialButton, powerButton, sqrtButton;
+    Button plusButton, minusButton, starButton, divButton, equslsButton, dotButton, leftBraceButton, rightBraceButton, factorialButton, powerButton, sqrtButton;
 
     Button sinButton, cosButton, tgButton, exponentaButton, lnButton, logButton, piButton;
 
     Button eraseButton, clearAllButton;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_main);
@@ -36,26 +43,14 @@ public class MainActivity extends AppCompatActivity {
 
         input = (TextView) findViewById(R.id.input_field);
         input.setText("");
-        input.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (!Counter.isCounted()) {
-                    appendExpression(getInput());
-                    String expression = getOutput();
-                    appendExpression("=");
-                    String result = Counter.calculate(expression);
-                    setInput(result);
-                }
-            }
-        });
 
-        output = (EditText) findViewById(R.id.output_field);
+     output = (EditText) findViewById(R.id.output_field);
         output.setText("");
         output.setEnabled(false);
 
         if (savedInstanceState != null) {
             String expression = savedInstanceState.getString(OUTPUT_VALUE);
-            setOutput(expression);
+            setExpression(expression);
             String input = savedInstanceState.getString(INPUT_VALUE);
             setInput(input);
         }
@@ -67,6 +62,7 @@ public class MainActivity extends AppCompatActivity {
                 appendInput("0");
             }
         });
+
 
         oneButton = (Button) findViewById(R.id.one_button);
         oneButton.setOnClickListener(new View.OnClickListener() {
@@ -92,14 +88,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        fourButton = (Button) findViewById(R.id.four_button);
-        fourButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                appendInput("4");
-            }
-        });
-
         fiveButton = (Button) findViewById(R.id.five_button);
         fiveButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -113,14 +101,6 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 appendInput("6");
-            }
-        });
-
-        sevenButton = (Button) findViewById(R.id.seven_button);
-        sevenButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                appendInput("7");
             }
         });
 
@@ -140,64 +120,13 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        dotButton = (Button) findViewById(R.id.dot_button);
-        dotButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                appendInput(".");
-            }
-        });
 
-        changeSignButton= (Button) findViewById(R.id.change_sign_button);
-        changeSignButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                changeSign();
-            }
-        });
-
-        plusButton = (Button) findViewById(R.id.plus_button);
-        plusButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                addAriphmetic("+");
-            }
-        });
-        minusButton = (Button) findViewById(R.id.minus_button);
-        minusButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                addAriphmetic("-");
-            }
-        });
-        starButton = (Button) findViewById(R.id.star_button);
-        starButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                addAriphmetic("*");
-            }
-        });
-        divButton = (Button) findViewById(R.id.div_button);
-        divButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                addAriphmetic("/");
-            }
-        });
-
-        divButton = (Button) findViewById(R.id.div_button);
-        divButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                addAriphmetic("/");
-            }
-        });
 
         sinButton = (Button) findViewById(R.id.sin_button);
         sinButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                addScientific("sin");
+                addSimpleOperation("sin(");
             }
         });
 
@@ -205,7 +134,7 @@ public class MainActivity extends AppCompatActivity {
         cosButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                addScientific("cos");
+                addSimpleOperation("cos(");
             }
         });
 
@@ -213,7 +142,7 @@ public class MainActivity extends AppCompatActivity {
         tgButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                addScientific("tg");
+                addSimpleOperation("tg(");
             }
         });
 
@@ -221,15 +150,15 @@ public class MainActivity extends AppCompatActivity {
         lnButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                addScientific("ln");
+                addSimpleOperation("ln(");
             }
         });
 
-        logButton = (Button) findViewById(R.id.log_button);
+        logButton = (Button) findViewById(R.id.ctg_button);
         logButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                addScientific("lg");
+                addSimpleOperation("ctg(");
             }
         });
 
@@ -237,7 +166,7 @@ public class MainActivity extends AppCompatActivity {
         exponentaButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                setInput(String.valueOf(Math.E));
+                addSimpleOperation(String.valueOf(Math.E));
             }
         });
 
@@ -245,7 +174,7 @@ public class MainActivity extends AppCompatActivity {
         piButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                setInput(String.valueOf(Math.PI));
+                addSimpleOperation(String.valueOf(Math.PI));
             }
         });
 
@@ -254,11 +183,10 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 String currentInput = getInput();
-                if (currentInput.length() >= 0) {
+                if (currentInput.length() > 0) {
                     appendExpression(currentInput);
+                    addSimpleOperation("!");
                 }
-                appendExpression("!");
-                setInput("");
             }
         });
 
@@ -267,11 +195,10 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 String currentInput = getInput();
-                if (currentInput.length() >= 0) {
+                if (currentInput.length() > 0) {
                     appendExpression(currentInput);
+                    addSimpleOperation("^");
                 }
-                appendExpression("^");
-                setInput("");
             }
         });
 
@@ -279,7 +206,7 @@ public class MainActivity extends AppCompatActivity {
         sqrtButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                addScientific("sqrt");
+                addSimpleOperation("sqrt(");
             }
         });
 
@@ -312,6 +239,8 @@ public class MainActivity extends AppCompatActivity {
                     newInput = currentInput.substring(0, currentInput.length() - 1);
                 }
                 setInput(newInput);
+
+
             }
         });
 
@@ -320,58 +249,284 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 setInput("");
-                setOutput("");
-                Counter.resetCount();
+                setExpression("");
+                Calculator.resetCalculated();
+            }
+        });
+
+        sevenButton = (Button) findViewById(R.id.seven_button);
+        sevenButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                appendInput("7");
+            }
+        });
+
+        equslsButton= (Button) findViewById(R.id.equals_button);
+        equslsButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (!Calculator.isCalculated()) {
+                    getInput();
+                    String expression = getInput();
+                    appendInput("=");
+                    String result = Calculator.calculate(expression);
+                    setInput(result);}
+            }
+        });
+
+        dotButton = (Button) findViewById(R.id.dot_button);
+        dotButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                appendInput(".");
+                }
+
+        });
+
+
+        fourButton = (Button) findViewById(R.id.four_button);
+        fourButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                appendInput("4");
+            }
+        });
+
+        plusButton = (Button) findViewById(R.id.plus_button);
+        plusButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                addSimpleOperation("+");
+
+            }
+        });
+
+        minusButton = (Button) findViewById(R.id.minus_button);
+        minusButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                addSimpleOperation("-");
+            }
+        });
+        starButton = (Button) findViewById(R.id.star_button);
+        starButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                 addSimpleOperation("*");
+            }
+        });
+        divButton = (Button) findViewById(R.id.div_button);
+        divButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                addSimpleOperation("/");
             }
         });
     }
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
-        outState.putString(OUTPUT_VALUE, getOutput());
+        outState.putString(OUTPUT_VALUE, getExpression());
         outState.putString(INPUT_VALUE, getInput());
         super.onSaveInstanceState(outState);
     }
-    public String getInput() {
+
+    public String getInput()
+    {
         return input.getText().toString();
     }
 
     public void setInput(String text) {
-        if (text.length() >= 12) {
-            text = String.format("%.12s", Float.valueOf(text));
-        }
         input.setText(text);
     }
 
-    public String getOutput() {
+   public String getExpression() {   //считывает то, что находится  в выводе
         return output.getText().toString();
     }
 
-    public void setOutput(String text) {
+    public void setExpression(String text) {  //устанавливает определённое значение в вывод
         output.setText(text);
     }
 
     public void appendInput(String str) {
         if (getInput().equals("Error")) return;
-        if (Counter.isCounted()) {
-            setOutput("");
+        if (Calculator.isCalculated()) {
+            setExpression("");
             setInput(str);
-            Counter.resetCount();
+            Calculator.resetCalculated();
             return;
         }
         String currentInput = getInput();
         String newInput;
 
-        if (currentInput.length() >= 11) {
+
+        if (currentInput.length() >= 500) {
+            input.setEnabled(false);
             return;
         }
+
+        String s = currentInput;
+
+         if (s.matches("\\d+(\\.\\d+)") && str.equals(".")) {return;}
+
+
+
+
+        //   if (s.matches("") && str.equals("")) {}
+/*
+                for (int i=0; i<s.length()-1; i++){
+                if (s.matches("^(?:(?:\\d+(?:\\.\\d*)?|\\.\\d+)(?:[-+/*%]|$))+$+") && str.equals(".")) {
+
+                    return;
+                }else appendInput(".");
+                }*/
+
+
+       /* int dotLate = currentInput.lastIndexOf(".");
+
+        if (currentInput.contains(".") && str.equals(".")) {
+        for (int i=currentInput.length()-1; i>=dotLate; i--)
+            currentInput.matches(" \\d+");
+        }
+      //  if (s.substring(dotLate, currentInput.length()-1).matches(" \\d+") && str.equals(".")) {return;}*/
+
+        boolean isInputEnndingPlus = s.endsWith("+");
+        if (isInputEnndingPlus && str.equals("+")){
+           return;
+        }
+        if (isInputEnndingPlus && str.equals("-"))
+        {
+            return;
+        }
+
+        if (currentInput.toString().matches("") && str.equals(".")) {
+            return;
+        }
+
+        if (currentInput.matches("") && str.equals(".")) {
+            return;
+        }
+
+
+
+        if (isInputEnndingPlus && str.equals("*"))
+        {return;}
+        if (isInputEnndingPlus && str.equals("/"))
+        {return;}
+        if (isInputEnndingPlus && str.equals("^"))
+        {return;}
+        if (isInputEnndingPlus && str.equals("!"))
+        {return;}
+        if (isInputEnndingPlus && str.equals("."))
+        {return;}
+
+        boolean isInputEnndingMInus = s.endsWith("-");
+        if (isInputEnndingMInus && str.equals("+"))
+        {return;}
+        if (isInputEnndingMInus && str.equals("-"))
+        {return;}
+        if (isInputEnndingMInus && str.equals("*"))
+        {return;}
+        if (isInputEnndingMInus && str.equals("/"))
+        {return;}
+        if (isInputEnndingMInus && str.equals("^"))
+        {return;}
+        if (isInputEnndingMInus && str.equals("!"))
+        {return;}
+        if (isInputEnndingMInus && str.equals("."))
+        {return;}
+
+        boolean isInputEndingStar = s.endsWith("*");
+        if (isInputEndingStar && str.equals("+"))
+        {return;}
+        if (isInputEndingStar && str.equals("-"))
+        {return;}
+        if (isInputEndingStar && str.equals("*"))
+        {return;}
+        if (isInputEndingStar && str.equals("/"))
+        {return;}
+        if (isInputEndingStar && str.equals("^"))
+        {return;}
+        if (isInputEndingStar && str.equals("!"))
+        {return;}
+        if (isInputEndingStar && str.equals("."))
+        {return;}
+
+        boolean isInputEndingSlash = s.endsWith("/");
+        if (isInputEndingSlash && str.equals("+"))
+        {return;}
+        if (isInputEndingSlash && str.equals("-"))
+        {return;}
+        if (isInputEndingSlash && str.equals("*"))
+        {return;}
+        if (isInputEndingSlash && str.equals("/"))
+        {return;}
+        if (isInputEndingSlash && str.equals("^"))
+        {return;}
+        if (isInputEndingSlash && str.equals("!"))
+        {return;}
+        if (isInputEndingSlash && str.equals("."))
+        {return;}
+
+
+        boolean isInputEndingUp = s.endsWith("^");
+        if (isInputEndingUp && str.equals("+"))
+        {return;}
+        if (isInputEndingUp && str.equals("-"))
+        {return;}
+        if (isInputEndingUp && str.equals("*"))
+        {return;}
+        if (isInputEndingUp && str.equals("/"))
+        {return;}
+        if (isInputEndingUp && str.equals("^"))
+        {return;}
+        if (isInputEndingUp && str.equals("!"))
+        {return;}
+        if (isInputEndingUp && str.equals("."))
+        {return;}
+        boolean isInputEndingVoskl = s.endsWith("!");
+        if (isInputEndingVoskl && str.equals("!"))
+        {return;}
+
+
+
+        boolean isInputEndingLeftBrace = s.endsWith("(");
+        if (isInputEndingLeftBrace && str.equals(")"))  {return;}
+
+
+        boolean isInputEndingRightBrace = s.endsWith(")");
+        if (isInputEndingRightBrace && str.equals("("))
+        {return;}
+
+        boolean isInputEndingDot = s.endsWith(".");
+        if (isInputEndingDot && str.equals("."))
+        {return;}
 
         if (currentInput.equals("0") && !str.equals(".")) {
             newInput = str;
             setInput(newInput);
             return;
         }
-        if (currentInput.indexOf(".") >= 0 && str.equals(".")) {
+
+      if (currentInput.equals("") && str.equals(".")) {
+            return;
+        }
+
+        if (currentInput.equals("+") && str.equals("-")) {
+            return;
+        }
+
+        if (currentInput.equals("") && str.equals("+")) {
+            return;
+        }
+
+        if (currentInput.equals("") && str.equals("*")) {
+            return;
+        }
+
+        if (currentInput.equals("") && str.equals("/")) {
             return;
         }
 
@@ -379,62 +534,36 @@ public class MainActivity extends AppCompatActivity {
         setInput(newInput);
     }
 
+
+
     public void appendExpression(String str) {
         if (getInput().equals("Error")) return;
-        String currentExpression = getOutput();
+        String currentExpression = getExpression();
         String newExpression = currentExpression + str;
-        setOutput(newExpression);
+        setInput(newExpression);
     }
 
-    public void changeSign() {
-        if (getInput().equals("Error")) return;
-        String currentInput = getInput();
-        String newInput;
-        if (currentInput.indexOf("-") == 0) {
-            newInput = currentInput.substring(1);
-        } else {
-            newInput = "-" + currentInput;
-        }
-        setInput(newInput);
-    }
-
-    public void addAriphmetic(String str) {
-        if (getInput().equals("Error")) return;
-        if (Counter.isCounted()) {
-            setOutput(getInput());
-            Counter.resetCount();
-        } else {
-            appendExpression(getInput());
-        }
-        appendExpression(str);
-        setInput("");
+    public void addSimpleOperation(String str) {
+            if (getInput().equals("Error")) return;
+            if (Calculator.isCalculated()) {
+                setInput(getInput());
+                Calculator.resetCalculated();
+            } else {
+                appendExpression(getInput());
+            }
+            appendInput(str);
     }
 
     public void addBracket(String bracket) {
         if (getInput().equals("Error")) return;
-        if (Counter.isCounted()) {
-            setInput("");
-            setOutput(bracket);
-            Counter.resetCount();
+        if (Calculator.isCalculated()) {
+            appendInput(bracket);
+            Calculator.resetCalculated();
             return;
         }
         if (getInput().length() > 0) {
             appendExpression(getInput());
         }
-        appendExpression(bracket);
-        setInput("");
-    }
-
-    public void addScientific(String operation) {
-        if (getInput().equals("Error")) return;
-        if (Counter.isCounted()) {
-            setOutput(operation);
-            Counter.resetCount();
-        } else {
-            appendExpression(operation);
-        }
-        appendExpression("(");
-        setInput("");
-
+        appendInput(bracket);
     }
 }

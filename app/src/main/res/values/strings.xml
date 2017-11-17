@@ -25,9 +25,9 @@
     <string name="two">2</string>
     <string name="three">3</string>
     <string name="minus">-</string>
-    <string name="log">lg</string>
+    <string name="ctg">ctg</string>
     <string name="zero">0</string>
     <string name="star">*</string>
-    <string name="change_sign">+/-</string>
+    <string name="equals">=</string>
     <string name="plus">+</string>
 </resources>
