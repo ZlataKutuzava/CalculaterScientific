@@ -361,6 +361,21 @@ public class MainActivity extends AppCompatActivity {
         String currentInput = getInput();
         String newInput;
 
+        if (str.equals(".")){
+            char chars[]=currentInput.toCharArray();
+            for (int i = currentInput.length()-2; i >0 ; i--) {
+                if(Character.isDigit(chars[i]))
+                    continue;
+                else if(chars[i]=='.'){
+                    dot=true;
+                }else break;
+            }
+        }
+
+        if(dot) {
+            dot = false;
+            return;
+        }
 
         if (currentInput.length() >= 500) {
             input.setEnabled(false);
@@ -369,28 +384,6 @@ public class MainActivity extends AppCompatActivity {
 
         String s = currentInput;
 
-         if (s.matches("\\d+(\\.\\d+)") && str.equals(".")) {return;}
-
-
-
-
-        //   if (s.matches("") && str.equals("")) {}
-/*
-                for (int i=0; i<s.length()-1; i++){
-                if (s.matches("^(?:(?:\\d+(?:\\.\\d*)?|\\.\\d+)(?:[-+/*%]|$))+$+") && str.equals(".")) {
-
-                    return;
-                }else appendInput(".");
-                }*/
-
-
-       /* int dotLate = currentInput.lastIndexOf(".");
-
-        if (currentInput.contains(".") && str.equals(".")) {
-        for (int i=currentInput.length()-1; i>=dotLate; i--)
-            currentInput.matches(" \\d+");
-        }
-      //  if (s.substring(dotLate, currentInput.length()-1).matches(" \\d+") && str.equals(".")) {return;}*/
 
         boolean isInputEnndingPlus = s.endsWith("+");
         if (isInputEnndingPlus && str.equals("+")){
