@@ -401,9 +401,6 @@ public class MainActivity extends AppCompatActivity {
         if (currentInput.matches("") && str.equals(".")) {
             return;
         }
-
-
-
         if (isInputEnndingPlus && str.equals("*"))
         {return;}
         if (isInputEnndingPlus && str.equals("/"))
